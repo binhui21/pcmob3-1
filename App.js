@@ -1,6 +1,12 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { Text, View, StyleSheet, FlatList } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import BlockRGB from "./components/BlockRGB";
@@ -16,8 +22,26 @@ function HomeScreen() {
     return <BlockRGB red={item.red} green={item.green} blue={item.blue} />;
   }
 
+  function addColor() {
+    setColorArray([
+      ...colorArray,
+      {
+        red: Math.floor(Math.random() * 256),
+        green: Math.floor(Math.random() * 256),
+        blue: Math.floor(Math.random() * 256),
+        id: `${colorArray.length}`,
+      },
+    ]);
+  }
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={{ height: 40, justifyContent: "center" }}
+        onPress={addColor}
+      >
+        <Text style={{ color: "red" }}>Add color</Text>
+      </TouchableOpacity>
       <FlatList style={styles.list} data={colorArray} renderItem={renderItem} />
     </View>
   );
@@ -38,7 +62,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
+    justifyContent: "center",
     //backgroundColor: '#ecf0f1',
     //padding: 8,
   },
