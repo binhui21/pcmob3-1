@@ -1,48 +1,83 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Button,
 } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import BlockRGB from "./components/BlockRGB";
 
-function HomeScreen() {
-  const { colorArray, setColorArray } = useState([
-    { red: 255, green: 0, blue: 0, id: "0" },
-    { red: 0, green: 255, blue: 0, id: "1" },
-    { red: 255, green: 0, blue: 255, id: "2" },
-  ]);
+function HomeScreen({ navigation }) {
+  const [colorArray, setColorArray] = useState([]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button onPress={addColor} title="Add colour" />,
+    });
+  });
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => <Button onPress={reset} title="Reset" />,
+    });
+  });
 
   function renderItem({ item }) {
-    return <BlockRGB red={item.red} green={item.green} blue={item.blue} />;
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate("DetailsScreen", { ...item })}
+      >
+        <BlockRGB red={item.red} green={item.green} blue={item.blue} />
+      </TouchableOpacity>
+    );
   }
 
   function addColor() {
     setColorArray([
-      ...colorArray,
       {
         red: Math.floor(Math.random() * 256),
         green: Math.floor(Math.random() * 256),
         blue: Math.floor(Math.random() * 256),
         id: `${colorArray.length}`,
       },
+      ...colorArray,
     ]);
+  }
+
+  function reset() {
+    setColorArray([]);
   }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={{ height: 40, justifyContent: "center" }}
-        onPress={addColor}
-      >
-        <Text style={{ color: "red" }}>Add color</Text>
-      </TouchableOpacity>
-      <FlatList style={styles.list} data={colorArray} renderItem={renderItem} />
+      <FlatList
+        style={styles.list}
+        data={colorArray}
+        renderItem={renderItem}
+        numColumns={4}
+      />
+    </View>
+  );
+}
+
+function DetailsScreen({ route }) {
+  const { red, green, blue } = route.params;
+  return (
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: `rgb(${red}, ${green}, ${blue})` },
+      ]}
+    >
+      <View style={{ padding: 30 }}>
+        <Text style={styles.detailText}>Red: {red}</Text>
+        <Text style={styles.detailText}>Green: {green}</Text>
+        <Text style={styles.detailText}>Blue: {blue}</Text>
+      </View>
     </View>
   );
 }
@@ -53,7 +88,22 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: "Home",
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="DetailsScreen"
+          component={DetailsScreen}
+          options={{
+            title: "Detail",
+            headerTitleAlign: "center",
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -63,7 +113,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    //backgroundColor: '#ecf0f1',
-    //padding: 8,
+    alignSelf: "stretch",
+  },
+
+  detailText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    alignSelf: "center",
   },
 });
